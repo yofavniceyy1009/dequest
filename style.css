@@ -1704,10 +1704,139 @@ button, input, select, textarea {
 .suggested-name { font-weight: bold; font-size: 0.9rem; color: #fff; }
 .suggested-level { font-size: 0.75rem; color: var(--text-muted); }
 
-/* Games Arcade Styles */
-.game-card { text-align: center; padding: 30px 20px; transition: transform 0.3s; }
-.game-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(96, 165, 250, 0.1); }
-.game-icon { font-size: 3rem; color: var(--accent); margin-bottom: 15px; }
+/* Games Arcade Styles — Multiverse Portal Theme */
+#view-games .page-title {
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+  text-shadow: 3px 3px 0 var(--primary), 6px 6px 0 rgba(0,0,0,0.4);
+}
+
+.arcade-subhead {
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  margin: -18px 0 28px;
+  font-size: 0.95rem;
+}
+
+.game-card {
+  text-align: center;
+  padding: 30px 20px 26px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Halftone dot texture, like a comic-print dimension */
+.game-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1.5px);
+  background-size: 10px 10px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Dimension-portal ring that snaps in on hover */
+.game-card::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -60%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity 0.25s ease, transform 0.6s cubic-bezier(0.4,0,0.2,1);
+  transform: scale(0.6) rotate(0deg);
+  z-index: 0;
+}
+
+.game-card:hover::after {
+  opacity: 0.35;
+  transform: scale(1) rotate(120deg);
+}
+
+.game-card:hover {
+  transform: translate(-4px, -4px) rotate(-1deg);
+  box-shadow: 10px 10px 0px var(--secondary);
+  border-color: var(--secondary);
+}
+
+.game-card > * { position: relative; z-index: 1; }
+
+.game-card .dimension-tag {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  color: var(--bg-dark);
+  background: var(--accent);
+  border: 2px solid #000;
+  padding: 2px 10px;
+  transform: rotate(-3deg);
+  margin-bottom: 14px;
+}
+
+.game-icon {
+  font-size: 3rem;
+  color: var(--accent);
+  margin-bottom: 15px;
+  filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.game-card:hover .game-icon {
+  color: var(--secondary);
+  transform: scale(1.15) rotate(-6deg);
+  animation: glitch 0.4s linear 2;
+}
+
+.game-card h3 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+
+/* Comic "impact" play button */
+.game-card .btn-play-game {
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.game-card .btn-play-game:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+
+.game-card .btn-play-game:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+/* Ultimate Arcade banner card gets its own bigger portal treatment */
+.game-card.ultimate-card {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d1830 50%, #1e1e1e 100%);
+  border: 3px solid var(--accent);
+}
+
+.game-card.ultimate-card::after {
+  width: 320px;
+  height: 320px;
+  top: -80%;
+  right: -30%;
+}
+
+.game-card.ultimate-card .game-icon {
+  color: var(--primary);
+}
 
 
 @keyframes zoomOut {
