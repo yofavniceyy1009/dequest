@@ -1,0 +1,776 @@
+diff --git a/app.js b/app.js
+index d0261e2..34513fc 100644
+--- a/app.js
++++ b/app.js
+@@ -2511,20 +2511,45 @@ document.addEventListener('DOMContentLoaded', () => {
+     }
+   }
+ 
++  // --- Shared comic-style end screen for the 4 lobby games ---
++  function arcadeEndScreen(container, won, dimensionColor, title, message) {
++    const icon = won ? 'fa-trophy' : 'fa-skull';
++    const iconColor = won ? '#fbbf24' : dimensionColor;
++    container.innerHTML = `
++      <div style="text-align:center; max-width:440px; margin:20px auto; background: var(--bg-card); border: 3px solid #000; box-shadow: 8px 8px 0 ${dimensionColor}; padding: 36px 28px; position:relative;">
++        <div style="position:absolute; top:0; left:0; right:0; bottom:0; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.5px); background-size:10px 10px; pointer-events:none;"></div>
++        <i class="fa-solid ${icon}" style="font-size:3rem; color:${iconColor}; filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));"></i>
++        <h2 style="font-family: var(--font-heading); letter-spacing:1px; margin:14px 0 6px; color:#fff;">${title}</h2>
++        <p style="color: var(--text-secondary); margin-bottom:22px;">${message}</p>
++        <button class="btn btn-accent" style="font-family: var(--font-heading); letter-spacing:1px; border:3px solid #000; box-shadow:4px 4px 0 #000;" onclick="document.getElementById('btn-exit-game').click()">Back to the Arcade</button>
++      </div>
++    `;
++  }
++
+   // --- GAME: Java Variable Matcher ---
+   function launchJavaMatcher(container) {
+-    container.innerHTML = '<h2>Java Variable Matcher</h2><p>Match the Java data type to its description.</p><div id="java-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 600px; margin-top: 20px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag" style="background:#e76f51;">Dimension: JAVA-1</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">Java Variable Matcher</h2>
++      <p style="color: var(--text-secondary);">Flip two cards to match each Java type to its description.</p>
++      <p id="java-progress" style="font-weight:bold; color:#e76f51;">Matched: 0 / 6</p>
++      <div id="java-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 640px; margin-top: 12px;"></div>
++    `;
+     
+     const pairs = [
+       { id: 1, text: 'int', type: 'tag' }, { id: 1, text: 'Whole numbers', type: 'def' },
+       { id: 2, text: 'double', type: 'tag' }, { id: 2, text: 'Decimals', type: 'def' },
+       { id: 3, text: 'boolean', type: 'tag' }, { id: 3, text: 'true / false', type: 'def' },
+-      { id: 4, text: 'String', type: 'tag' }, { id: 4, text: 'Text (objects)', type: 'def' }
++      { id: 4, text: 'String', type: 'tag' }, { id: 4, text: 'Text (objects)', type: 'def' },
++      { id: 5, text: 'char', type: 'tag' }, { id: 5, text: 'A single character', type: 'def' },
++      { id: 6, text: 'long', type: 'tag' }, { id: 6, text: 'Very large whole numbers', type: 'def' }
+     ];
+     // Shuffle
+     pairs.sort(() => Math.random() - 0.5);
+ 
+     const grid = document.getElementById('java-matcher-grid');
++    const progressEl = document.getElementById('java-progress');
++    const totalPairs = pairs.length / 2;
+     let firstCard = null;
+     let lockBoard = false;
+     let matches = 0;
+@@ -2532,7 +2557,7 @@ document.addEventListener('DOMContentLoaded', () => {
+     pairs.forEach(p => {
+       const card = document.createElement('div');
+       card.className = 'matcher-card';
+-      card.style = 'background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: transparent; transition: all 0.3s;';
++      card.style = 'background: var(--bg-card); border: 3px solid #000; box-shadow: 4px 4px 0 #000; height: 100px; display: flex; align-items: center; justify-content: center; text-align:center; cursor: pointer; font-size: 1.05rem; color: transparent; padding: 6px; transition: background 0.2s, transform 0.15s;';
+       card.dataset.id = p.id;
+       card.dataset.text = p.text;
+       
+@@ -2541,8 +2566,9 @@ document.addEventListener('DOMContentLoaded', () => {
+         if (card.classList.contains('flipped')) return;
+         
+         card.classList.add('flipped');
+-        card.style.background = 'var(--primary)';
++        card.style.background = '#e76f51';
+         card.style.color = '#fff';
++        card.style.fontFamily = 'var(--font-heading)';
+         card.innerHTML = p.text;
+ 
+         if (!firstCard) {
+@@ -2553,33 +2579,34 @@ document.addEventListener('DOMContentLoaded', () => {
+         // Check match
+         if (firstCard.dataset.id === card.dataset.id) {
+           // match
+-          firstCard.style.borderColor = '#10b981';
+-          card.style.borderColor = '#10b981';
++          firstCard.style.boxShadow = '4px 4px 0 var(--success)';
++          card.style.boxShadow = '4px 4px 0 var(--success)';
+           firstCard = null;
+           matches++;
+-          if (matches === 4) {
++          progressEl.textContent = `Matched: ${matches} / ${totalPairs}`;
++          if (matches === totalPairs) {
+             setTimeout(() => {
+-              container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>Great job matching the Java data types.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++              arcadeEndScreen(container, true, '#e76f51', 'Dimension Cleared!', 'Great job matching every Java data type.');
+               awardGameXP();
+-            }, 1000);
++            }, 800);
+           }
+         } else {
+           // unmatch
+           lockBoard = true;
+           setTimeout(() => {
+             firstCard.classList.remove('flipped');
+-            firstCard.style.background = 'var(--card-bg)';
++            firstCard.style.background = 'var(--bg-card)';
+             firstCard.style.color = 'transparent';
+             firstCard.innerHTML = '';
+             
+             card.classList.remove('flipped');
+-            card.style.background = 'var(--card-bg)';
++            card.style.background = 'var(--bg-card)';
+             card.style.color = 'transparent';
+             card.innerHTML = '';
+             
+             firstCard = null;
+             lockBoard = false;
+-          }, 1000);
++          }, 900);
+         }
+       });
+       grid.appendChild(card);
+@@ -2588,18 +2615,28 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 1: HTML Matcher ---
+   function launchHtmlMatcher(container) {
+-    container.innerHTML = '<h2>HTML Tag Matcher</h2><p>Match the tag to its definition.</p><div id="html-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 600px; margin-top: 20px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: HTML-616</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">HTML Tag Matcher</h2>
++      <p style="color: var(--text-secondary);">Flip two cards to match each tag to its definition.</p>
++      <p id="html-progress" style="font-weight:bold; color: var(--secondary);">Matched: 0 / 6</p>
++      <div id="html-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 640px; margin-top: 12px;"></div>
++    `;
+     
+     const pairs = [
+       { id: 1, text: '&lt;h1&gt;', type: 'tag' }, { id: 1, text: 'Main Heading', type: 'def' },
+       { id: 2, text: '&lt;a&gt;', type: 'tag' }, { id: 2, text: 'Hyperlink', type: 'def' },
+       { id: 3, text: '&lt;img&gt;', type: 'tag' }, { id: 3, text: 'Image embedding', type: 'def' },
+-      { id: 4, text: '&lt;div&gt;', type: 'tag' }, { id: 4, text: 'Block container', type: 'def' }
++      { id: 4, text: '&lt;div&gt;', type: 'tag' }, { id: 4, text: 'Block container', type: 'def' },
++      { id: 5, text: '&lt;ul&gt;', type: 'tag' }, { id: 5, text: 'Unordered list', type: 'def' },
++      { id: 6, text: '&lt;button&gt;', type: 'tag' }, { id: 6, text: 'Clickable button', type: 'def' }
+     ];
+     // Shuffle
+     pairs.sort(() => Math.random() - 0.5);
+ 
+     const grid = document.getElementById('html-matcher-grid');
++    const progressEl = document.getElementById('html-progress');
++    const totalPairs = pairs.length / 2;
+     let firstCard = null;
+     let lockBoard = false;
+     let matches = 0;
+@@ -2607,7 +2644,7 @@ document.addEventListener('DOMContentLoaded', () => {
+     pairs.forEach(p => {
+       const card = document.createElement('div');
+       card.className = 'matcher-card';
+-      card.style = 'background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: transparent; transition: all 0.3s;';
++      card.style = 'background: var(--bg-card); border: 3px solid #000; box-shadow: 4px 4px 0 #000; height: 100px; display: flex; align-items: center; justify-content: center; text-align:center; cursor: pointer; font-size: 1.05rem; color: transparent; padding: 6px; transition: background 0.2s, transform 0.15s;';
+       card.dataset.id = p.id;
+       card.dataset.text = p.text;
+       
+@@ -2618,6 +2655,7 @@ document.addEventListener('DOMContentLoaded', () => {
+         card.classList.add('flipped');
+         card.style.background = 'var(--primary)';
+         card.style.color = '#fff';
++        card.style.fontFamily = 'var(--font-heading)';
+         card.innerHTML = p.text;
+ 
+         if (!firstCard) {
+@@ -2628,33 +2666,34 @@ document.addEventListener('DOMContentLoaded', () => {
+         // Check match
+         if (firstCard.dataset.id === card.dataset.id) {
+           // match
+-          firstCard.style.borderColor = '#10b981';
+-          card.style.borderColor = '#10b981';
++          firstCard.style.boxShadow = '4px 4px 0 var(--success)';
++          card.style.boxShadow = '4px 4px 0 var(--success)';
+           firstCard = null;
+           matches++;
+-          if (matches === 4) {
++          progressEl.textContent = `Matched: ${matches} / ${totalPairs}`;
++          if (matches === totalPairs) {
+             setTimeout(() => {
+-              container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>Great job matching the HTML tags.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++              arcadeEndScreen(container, true, 'var(--secondary)', 'Dimension Cleared!', 'Great job matching every HTML tag.');
+               awardGameXP();
+-            }, 1000);
++            }, 800);
+           }
+         } else {
+           // unmatch
+           lockBoard = true;
+           setTimeout(() => {
+             firstCard.classList.remove('flipped');
+-            firstCard.style.background = 'var(--card-bg)';
++            firstCard.style.background = 'var(--bg-card)';
+             firstCard.style.color = 'transparent';
+             firstCard.innerHTML = '';
+             
+             card.classList.remove('flipped');
+-            card.style.background = 'var(--card-bg)';
++            card.style.background = 'var(--bg-card)';
+             card.style.color = 'transparent';
+             card.innerHTML = '';
+             
+             firstCard = null;
+             lockBoard = false;
+-          }, 1000);
++          }, 900);
+         }
+       });
+       grid.appendChild(card);
+@@ -2663,10 +2702,18 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 2: CSS Inspector ---
+   function launchCssInspector(container) {
+-    container.innerHTML = '<h2>CSS Style Inspector</h2><p>Which CSS rule creates the shape below?</p><div id="css-target" style="width: 100px; height: 100px; background: #ef4444; border-radius: 50%; border: 4px dashed #fff; margin: 30px 0;"></div><div id="css-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:400px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: CSS-42</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">CSS Style Inspector</h2>
++      <p style="color: var(--text-secondary);">Which CSS rule creates the shape below?</p>
++      <p id="css-progress" style="font-weight:bold; color: var(--accent);">Level 1 / 5</p>
++      <div id="css-target" style="width: 100px; height: 100px; background: #ef4444; border-radius: 50%; border: 4px dashed #fff; margin: 20px 0;"></div>
++      <div id="css-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px;"></div>
++    `;
+     
+     const targetEl = document.getElementById('css-target');
+     const optionsContainer = document.getElementById('css-options');
++    const progressEl = document.getElementById('css-progress');
+     
+     // Levels data
+     const levels = [
+@@ -2684,6 +2731,16 @@ document.addEventListener('DOMContentLoaded', () => {
+         style: 'width:100px; height:100px; background: linear-gradient(45deg, #ef4444, #3b82f6); border-radius: 0;',
+         correct: 'background: linear-gradient(45deg, red, blue);',
+         wrong: ['background-color: purple;', 'background: radial-gradient(red, blue);']
++      },
++      {
++        style: 'width:120px; height:120px; background: #f2e105; border-radius: 20px 0 20px 0; border: 4px solid #000;',
++        correct: 'border-radius: 20px 0 20px 0;\nborder: 4px solid #000;',
++        wrong: ['border-radius: 20px;\nborder: 4px dotted #000;', 'border-radius: 0 20px 0 20px;\nborder: none;']
++      },
++      {
++        style: 'width:140px; height:60px; background: transparent; border: 6px solid #00f0ff; transform: skewX(-10deg);',
++        correct: 'border: 6px solid #00f0ff;\ntransform: skewX(-10deg);',
++        wrong: ['border: 6px solid #00f0ff;\ntransform: rotate(-10deg);', 'background: #00f0ff;\ntransform: skewX(-10deg);']
+       }
+     ];
+     
+@@ -2691,11 +2748,12 @@ document.addEventListener('DOMContentLoaded', () => {
+     
+     function loadCssLevel() {
+       if (currentLevel >= levels.length) {
+-        container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>You have a great eye for CSS!</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++        arcadeEndScreen(container, true, 'var(--accent)', 'Dimension Cleared!', 'You have a great eye for CSS!');
+         awardGameXP();
+         return;
+       }
+       
++      progressEl.textContent = `Level ${currentLevel + 1} / ${levels.length}`;
+       const lvl = levels[currentLevel];
+       targetEl.style = lvl.style;
+       optionsContainer.innerHTML = '';
+@@ -2706,18 +2764,20 @@ document.addEventListener('DOMContentLoaded', () => {
+         const btn = document.createElement('button');
+         btn.className = 'btn btn-secondary';
+         btn.style.textAlign = 'left';
+-        btn.style.fontFamily = 'monospace';
++        btn.style.fontFamily = 'var(--font-mono)';
+         btn.style.whiteSpace = 'pre';
++        btn.style.border = '3px solid #000';
++        btn.style.boxShadow = '3px 3px 0 #000';
+         btn.innerText = opt;
+         btn.addEventListener('click', () => {
+           if (opt === lvl.correct) {
+-            btn.style.background = '#10b981';
++            btn.style.background = 'var(--success)';
+             setTimeout(() => {
+               currentLevel++;
+               loadCssLevel();
+-            }, 800);
++            }, 700);
+           } else {
+-            btn.style.background = '#ef4444';
++            btn.style.background = 'var(--danger)';
+             setTimeout(() => {
+               btn.style.background = 'var(--secondary)';
+             }, 500);
+@@ -2732,14 +2792,25 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 3: JS Logic Run ---
+   function launchJsLogic(container) {
+-    container.innerHTML = '<h2>JS Logic Run</h2><p>Evaluate the expression before time runs out!</p><h3 id="js-expression" style="font-size: 2rem; color: var(--accent); margin: 20px 0; font-family: monospace;">5 === "5"</h3><div style="width:100%; max-width:400px; height: 10px; background: var(--secondary); border-radius: 5px; margin-bottom: 20px;"><div id="js-timer-bar" style="width: 100%; height: 100%; background: #ef4444; border-radius: 5px; transition: width 0.1s linear;"></div></div><div id="js-options" style="display:flex; gap: 15px;"></div><p id="js-score" style="margin-top:20px; font-weight:bold;">Score: 0 / 5</p>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: JS-199999</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">JS Logic Run</h2>
++      <p style="color: var(--text-secondary);">Evaluate the expression before time runs out!</p>
++      <h3 id="js-expression" style="font-size: 2rem; color: var(--accent); margin: 16px 0; font-family: var(--font-mono);">5 === "5"</h3>
++      <div style="width:100%; max-width:400px; height: 10px; background: var(--bg-card); border: 2px solid #000; margin-bottom: 20px;"><div id="js-timer-bar" style="width: 100%; height: 100%; background: var(--success); transition: width 0.1s linear;"></div></div>
++      <div id="js-options" style="display:flex; gap: 15px; flex-wrap: wrap; justify-content: center;"></div>
++      <p id="js-score" style="margin-top:20px; font-weight:bold; color: var(--secondary);">Score: 0 / 8</p>
++    `;
+     
+     const expressions = [
+       { exp: '5 === "5"', ans: 'false', opts: ['true', 'false', 'undefined'] },
+       { exp: 'typeof []', ans: '"object"', opts: ['"array"', '"object"', '"undefined"'] },
+       { exp: 'Boolean(0)', ans: 'false', opts: ['true', 'false', 'null'] },
+       { exp: '10 % 3', ans: '1', opts: ['3', '1', '0'] },
+-      { exp: 'NaN === NaN', ans: 'false', opts: ['true', 'false', 'Error'] }
++      { exp: 'NaN === NaN', ans: 'false', opts: ['true', 'false', 'Error'] },
++      { exp: '[] + []', ans: '""', opts: ['"[object Object]"', '"NaN"', '""'] },
++      { exp: 'typeof null', ans: '"object"', opts: ['"null"', '"object"', '"undefined"'] },
++      { exp: '"5" + 3', ans: '"53"', opts: ['8', '"53"', 'NaN'] }
+     ];
+     
+     let currentQ = 0;
+@@ -2755,11 +2826,11 @@ document.addEventListener('DOMContentLoaded', () => {
+     function startQuestion() {
+       if (currentQ >= expressions.length) {
+         clearInterval(timerInt);
+-        if (score >= 4) {
+-          container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>You survived the Logic Run.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++        if (score >= 6) {
++          arcadeEndScreen(container, true, 'var(--primary)', 'Logic Run Complete!', `You survived with a score of ${score} / ${expressions.length}.`);
+           awardGameXP();
+         } else {
+-          container.innerHTML = '<h2>Game Over</h2><p>You need at least 4 correct to win.</p><button class="btn btn-secondary" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++          arcadeEndScreen(container, false, 'var(--primary)', 'Glitched Out', `You need at least 6 / ${expressions.length} correct to win. You scored ${score}.`);
+         }
+         return;
+       }
+@@ -2781,7 +2852,7 @@ document.addEventListener('DOMContentLoaded', () => {
+           } else {
+             btn.style.background = '#ef4444';
+           }
+-          scoreEl.textContent = `Score: ${score} / 5`;
++          scoreEl.textContent = `Score: ${score} / ${expressions.length}`;
+           setTimeout(() => {
+             currentQ++;
+             startQuestion();
+diff --git a/arcade-games.js b/arcade-games.js
+index 44ef376..589b6df 100644
+--- a/arcade-games.js
++++ b/arcade-games.js
+@@ -16,7 +16,7 @@ function initUltimateArcade(container) {
+     <h2><i class="fa-solid fa-gamepad" style="color: var(--accent);"></i> Ultimate Course Arcade</h2>
+     <p>Select a course and a game mode to begin your adventure!</p>
+     
+-    <div style="background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
++    <div style="background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
+       
+       <div style="margin-bottom: 20px;">
+         <label style="display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-secondary);">1. Select your Course (The Topic)</label>
+@@ -30,19 +30,19 @@ function initUltimateArcade(container) {
+         
+         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+           <!-- Mode: RPG Boss Battler -->
+-          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-dragon" style="color: #ef4444;"></i> RPG Boss Battler</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Turn-based combat. Answer questions to attack the course boss!</p>
+           </div>
+ 
+           <!-- Mode: Typing Defense -->
+-          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-meteor" style="color: #3b82f6;"></i> Typing Defense</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Defend your base! Type falling concepts from the course quickly.</p>
+           </div>
+ 
+           <!-- Mode: Concept Catcher -->
+-          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-basket-shopping" style="color: #10b981;"></i> Concept Catcher</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Fast-paced arcade action. Catch good concepts, dodge bugs!</p>
+           </div>
+@@ -127,7 +127,7 @@ function finishUltimateGame(container, won, xpAmount, title, message) {
+   let titleStr = won ? `<h2><i class="fa-solid fa-trophy" style="color: ${trophyColor};"></i> You Won!</h2>` : `<h2><i class="fa-solid fa-skull" style="color: #ef4444;"></i> Game Over</h2>`;
+   
+   container.innerHTML = `
+-    <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
++    <div style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
+       ${titleStr}
+       <h3 style="color: var(--accent); margin: 10px 0;">${title}</h3>
+       <p style="color: var(--text-secondary); margin-bottom: 20px;">${message}</p>
+@@ -199,7 +199,7 @@ function launchRpgBattler(container, courseData) {
+       </div>
+ 
+       <!-- Bottom: Command Menu / Question Box -->
+-      <div style="height: 200px; background: var(--bg-color); border-top: 4px solid var(--border-color); padding: 15px;">
++      <div style="height: 200px; background: var(--bg-dashboard); border-top: 4px solid var(--border-color); padding: 15px;">
+         <div id="rpg-action-area">
+           <p id="rpg-q-text" style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: bold;"></p>
+           <div id="rpg-q-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+diff --git a/deploy/app.js b/deploy/app.js
+index a1d2cef..fced94d 100644
+--- a/deploy/app.js
++++ b/deploy/app.js
+@@ -2425,20 +2425,45 @@ document.addEventListener('DOMContentLoaded', () => {
+     }
+   }
+ 
++  // --- Shared comic-style end screen for the 4 lobby games ---
++  function arcadeEndScreen(container, won, dimensionColor, title, message) {
++    const icon = won ? 'fa-trophy' : 'fa-skull';
++    const iconColor = won ? '#fbbf24' : dimensionColor;
++    container.innerHTML = `
++      <div style="text-align:center; max-width:440px; margin:20px auto; background: var(--bg-card); border: 3px solid #000; box-shadow: 8px 8px 0 ${dimensionColor}; padding: 36px 28px; position:relative;">
++        <div style="position:absolute; top:0; left:0; right:0; bottom:0; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.5px); background-size:10px 10px; pointer-events:none;"></div>
++        <i class="fa-solid ${icon}" style="font-size:3rem; color:${iconColor}; filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));"></i>
++        <h2 style="font-family: var(--font-heading); letter-spacing:1px; margin:14px 0 6px; color:#fff;">${title}</h2>
++        <p style="color: var(--text-secondary); margin-bottom:22px;">${message}</p>
++        <button class="btn btn-accent" style="font-family: var(--font-heading); letter-spacing:1px; border:3px solid #000; box-shadow:4px 4px 0 #000;" onclick="document.getElementById('btn-exit-game').click()">Back to the Arcade</button>
++      </div>
++    `;
++  }
++
+   // --- GAME: Java Variable Matcher ---
+   function launchJavaMatcher(container) {
+-    container.innerHTML = '<h2>Java Variable Matcher</h2><p>Match the Java data type to its description.</p><div id="java-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 600px; margin-top: 20px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag" style="background:#e76f51;">Dimension: JAVA-1</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">Java Variable Matcher</h2>
++      <p style="color: var(--text-secondary);">Flip two cards to match each Java type to its description.</p>
++      <p id="java-progress" style="font-weight:bold; color:#e76f51;">Matched: 0 / 6</p>
++      <div id="java-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 640px; margin-top: 12px;"></div>
++    `;
+     
+     const pairs = [
+       { id: 1, text: 'int', type: 'tag' }, { id: 1, text: 'Whole numbers', type: 'def' },
+       { id: 2, text: 'double', type: 'tag' }, { id: 2, text: 'Decimals', type: 'def' },
+       { id: 3, text: 'boolean', type: 'tag' }, { id: 3, text: 'true / false', type: 'def' },
+-      { id: 4, text: 'String', type: 'tag' }, { id: 4, text: 'Text (objects)', type: 'def' }
++      { id: 4, text: 'String', type: 'tag' }, { id: 4, text: 'Text (objects)', type: 'def' },
++      { id: 5, text: 'char', type: 'tag' }, { id: 5, text: 'A single character', type: 'def' },
++      { id: 6, text: 'long', type: 'tag' }, { id: 6, text: 'Very large whole numbers', type: 'def' }
+     ];
+     // Shuffle
+     pairs.sort(() => Math.random() - 0.5);
+ 
+     const grid = document.getElementById('java-matcher-grid');
++    const progressEl = document.getElementById('java-progress');
++    const totalPairs = pairs.length / 2;
+     let firstCard = null;
+     let lockBoard = false;
+     let matches = 0;
+@@ -2446,7 +2471,7 @@ document.addEventListener('DOMContentLoaded', () => {
+     pairs.forEach(p => {
+       const card = document.createElement('div');
+       card.className = 'matcher-card';
+-      card.style = 'background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: transparent; transition: all 0.3s;';
++      card.style = 'background: var(--bg-card); border: 3px solid #000; box-shadow: 4px 4px 0 #000; height: 100px; display: flex; align-items: center; justify-content: center; text-align:center; cursor: pointer; font-size: 1.05rem; color: transparent; padding: 6px; transition: background 0.2s, transform 0.15s;';
+       card.dataset.id = p.id;
+       card.dataset.text = p.text;
+       
+@@ -2455,8 +2480,9 @@ document.addEventListener('DOMContentLoaded', () => {
+         if (card.classList.contains('flipped')) return;
+         
+         card.classList.add('flipped');
+-        card.style.background = 'var(--primary)';
++        card.style.background = '#e76f51';
+         card.style.color = '#fff';
++        card.style.fontFamily = 'var(--font-heading)';
+         card.innerHTML = p.text;
+ 
+         if (!firstCard) {
+@@ -2467,33 +2493,34 @@ document.addEventListener('DOMContentLoaded', () => {
+         // Check match
+         if (firstCard.dataset.id === card.dataset.id) {
+           // match
+-          firstCard.style.borderColor = '#10b981';
+-          card.style.borderColor = '#10b981';
++          firstCard.style.boxShadow = '4px 4px 0 var(--success)';
++          card.style.boxShadow = '4px 4px 0 var(--success)';
+           firstCard = null;
+           matches++;
+-          if (matches === 4) {
++          progressEl.textContent = `Matched: ${matches} / ${totalPairs}`;
++          if (matches === totalPairs) {
+             setTimeout(() => {
+-              container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>Great job matching the Java data types.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++              arcadeEndScreen(container, true, '#e76f51', 'Dimension Cleared!', 'Great job matching every Java data type.');
+               awardGameXP();
+-            }, 1000);
++            }, 800);
+           }
+         } else {
+           // unmatch
+           lockBoard = true;
+           setTimeout(() => {
+             firstCard.classList.remove('flipped');
+-            firstCard.style.background = 'var(--card-bg)';
++            firstCard.style.background = 'var(--bg-card)';
+             firstCard.style.color = 'transparent';
+             firstCard.innerHTML = '';
+             
+             card.classList.remove('flipped');
+-            card.style.background = 'var(--card-bg)';
++            card.style.background = 'var(--bg-card)';
+             card.style.color = 'transparent';
+             card.innerHTML = '';
+             
+             firstCard = null;
+             lockBoard = false;
+-          }, 1000);
++          }, 900);
+         }
+       });
+       grid.appendChild(card);
+@@ -2502,18 +2529,28 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 1: HTML Matcher ---
+   function launchHtmlMatcher(container) {
+-    container.innerHTML = '<h2>HTML Tag Matcher</h2><p>Match the tag to its definition.</p><div id="html-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 600px; margin-top: 20px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: HTML-616</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">HTML Tag Matcher</h2>
++      <p style="color: var(--text-secondary);">Flip two cards to match each tag to its definition.</p>
++      <p id="html-progress" style="font-weight:bold; color: var(--secondary);">Matched: 0 / 6</p>
++      <div id="html-matcher-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 640px; margin-top: 12px;"></div>
++    `;
+     
+     const pairs = [
+       { id: 1, text: '&lt;h1&gt;', type: 'tag' }, { id: 1, text: 'Main Heading', type: 'def' },
+       { id: 2, text: '&lt;a&gt;', type: 'tag' }, { id: 2, text: 'Hyperlink', type: 'def' },
+       { id: 3, text: '&lt;img&gt;', type: 'tag' }, { id: 3, text: 'Image embedding', type: 'def' },
+-      { id: 4, text: '&lt;div&gt;', type: 'tag' }, { id: 4, text: 'Block container', type: 'def' }
++      { id: 4, text: '&lt;div&gt;', type: 'tag' }, { id: 4, text: 'Block container', type: 'def' },
++      { id: 5, text: '&lt;ul&gt;', type: 'tag' }, { id: 5, text: 'Unordered list', type: 'def' },
++      { id: 6, text: '&lt;button&gt;', type: 'tag' }, { id: 6, text: 'Clickable button', type: 'def' }
+     ];
+     // Shuffle
+     pairs.sort(() => Math.random() - 0.5);
+ 
+     const grid = document.getElementById('html-matcher-grid');
++    const progressEl = document.getElementById('html-progress');
++    const totalPairs = pairs.length / 2;
+     let firstCard = null;
+     let lockBoard = false;
+     let matches = 0;
+@@ -2521,7 +2558,7 @@ document.addEventListener('DOMContentLoaded', () => {
+     pairs.forEach(p => {
+       const card = document.createElement('div');
+       card.className = 'matcher-card';
+-      card.style = 'background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: transparent; transition: all 0.3s;';
++      card.style = 'background: var(--bg-card); border: 3px solid #000; box-shadow: 4px 4px 0 #000; height: 100px; display: flex; align-items: center; justify-content: center; text-align:center; cursor: pointer; font-size: 1.05rem; color: transparent; padding: 6px; transition: background 0.2s, transform 0.15s;';
+       card.dataset.id = p.id;
+       card.dataset.text = p.text;
+       
+@@ -2532,6 +2569,7 @@ document.addEventListener('DOMContentLoaded', () => {
+         card.classList.add('flipped');
+         card.style.background = 'var(--primary)';
+         card.style.color = '#fff';
++        card.style.fontFamily = 'var(--font-heading)';
+         card.innerHTML = p.text;
+ 
+         if (!firstCard) {
+@@ -2542,33 +2580,34 @@ document.addEventListener('DOMContentLoaded', () => {
+         // Check match
+         if (firstCard.dataset.id === card.dataset.id) {
+           // match
+-          firstCard.style.borderColor = '#10b981';
+-          card.style.borderColor = '#10b981';
++          firstCard.style.boxShadow = '4px 4px 0 var(--success)';
++          card.style.boxShadow = '4px 4px 0 var(--success)';
+           firstCard = null;
+           matches++;
+-          if (matches === 4) {
++          progressEl.textContent = `Matched: ${matches} / ${totalPairs}`;
++          if (matches === totalPairs) {
+             setTimeout(() => {
+-              container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>Great job matching the HTML tags.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++              arcadeEndScreen(container, true, 'var(--secondary)', 'Dimension Cleared!', 'Great job matching every HTML tag.');
+               awardGameXP();
+-            }, 1000);
++            }, 800);
+           }
+         } else {
+           // unmatch
+           lockBoard = true;
+           setTimeout(() => {
+             firstCard.classList.remove('flipped');
+-            firstCard.style.background = 'var(--card-bg)';
++            firstCard.style.background = 'var(--bg-card)';
+             firstCard.style.color = 'transparent';
+             firstCard.innerHTML = '';
+             
+             card.classList.remove('flipped');
+-            card.style.background = 'var(--card-bg)';
++            card.style.background = 'var(--bg-card)';
+             card.style.color = 'transparent';
+             card.innerHTML = '';
+             
+             firstCard = null;
+             lockBoard = false;
+-          }, 1000);
++          }, 900);
+         }
+       });
+       grid.appendChild(card);
+@@ -2577,10 +2616,18 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 2: CSS Inspector ---
+   function launchCssInspector(container) {
+-    container.innerHTML = '<h2>CSS Style Inspector</h2><p>Which CSS rule creates the shape below?</p><div id="css-target" style="width: 100px; height: 100px; background: #ef4444; border-radius: 50%; border: 4px dashed #fff; margin: 30px 0;"></div><div id="css-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:400px;"></div>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: CSS-42</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">CSS Style Inspector</h2>
++      <p style="color: var(--text-secondary);">Which CSS rule creates the shape below?</p>
++      <p id="css-progress" style="font-weight:bold; color: var(--accent);">Level 1 / 5</p>
++      <div id="css-target" style="width: 100px; height: 100px; background: #ef4444; border-radius: 50%; border: 4px dashed #fff; margin: 20px 0;"></div>
++      <div id="css-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px;"></div>
++    `;
+     
+     const targetEl = document.getElementById('css-target');
+     const optionsContainer = document.getElementById('css-options');
++    const progressEl = document.getElementById('css-progress');
+     
+     // Levels data
+     const levels = [
+@@ -2598,6 +2645,16 @@ document.addEventListener('DOMContentLoaded', () => {
+         style: 'width:100px; height:100px; background: linear-gradient(45deg, #ef4444, #3b82f6); border-radius: 0;',
+         correct: 'background: linear-gradient(45deg, red, blue);',
+         wrong: ['background-color: purple;', 'background: radial-gradient(red, blue);']
++      },
++      {
++        style: 'width:120px; height:120px; background: #f2e105; border-radius: 20px 0 20px 0; border: 4px solid #000;',
++        correct: 'border-radius: 20px 0 20px 0;\nborder: 4px solid #000;',
++        wrong: ['border-radius: 20px;\nborder: 4px dotted #000;', 'border-radius: 0 20px 0 20px;\nborder: none;']
++      },
++      {
++        style: 'width:140px; height:60px; background: transparent; border: 6px solid #00f0ff; transform: skewX(-10deg);',
++        correct: 'border: 6px solid #00f0ff;\ntransform: skewX(-10deg);',
++        wrong: ['border: 6px solid #00f0ff;\ntransform: rotate(-10deg);', 'background: #00f0ff;\ntransform: skewX(-10deg);']
+       }
+     ];
+     
+@@ -2605,11 +2662,12 @@ document.addEventListener('DOMContentLoaded', () => {
+     
+     function loadCssLevel() {
+       if (currentLevel >= levels.length) {
+-        container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>You have a great eye for CSS!</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++        arcadeEndScreen(container, true, 'var(--accent)', 'Dimension Cleared!', 'You have a great eye for CSS!');
+         awardGameXP();
+         return;
+       }
+       
++      progressEl.textContent = `Level ${currentLevel + 1} / ${levels.length}`;
+       const lvl = levels[currentLevel];
+       targetEl.style = lvl.style;
+       optionsContainer.innerHTML = '';
+@@ -2620,18 +2678,20 @@ document.addEventListener('DOMContentLoaded', () => {
+         const btn = document.createElement('button');
+         btn.className = 'btn btn-secondary';
+         btn.style.textAlign = 'left';
+-        btn.style.fontFamily = 'monospace';
++        btn.style.fontFamily = 'var(--font-mono)';
+         btn.style.whiteSpace = 'pre';
++        btn.style.border = '3px solid #000';
++        btn.style.boxShadow = '3px 3px 0 #000';
+         btn.innerText = opt;
+         btn.addEventListener('click', () => {
+           if (opt === lvl.correct) {
+-            btn.style.background = '#10b981';
++            btn.style.background = 'var(--success)';
+             setTimeout(() => {
+               currentLevel++;
+               loadCssLevel();
+-            }, 800);
++            }, 700);
+           } else {
+-            btn.style.background = '#ef4444';
++            btn.style.background = 'var(--danger)';
+             setTimeout(() => {
+               btn.style.background = 'var(--secondary)';
+             }, 500);
+@@ -2646,14 +2706,25 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+   // --- GAME 3: JS Logic Run ---
+   function launchJsLogic(container) {
+-    container.innerHTML = '<h2>JS Logic Run</h2><p>Evaluate the expression before time runs out!</p><h3 id="js-expression" style="font-size: 2rem; color: var(--accent); margin: 20px 0; font-family: monospace;">5 === "5"</h3><div style="width:100%; max-width:400px; height: 10px; background: var(--secondary); border-radius: 5px; margin-bottom: 20px;"><div id="js-timer-bar" style="width: 100%; height: 100%; background: #ef4444; border-radius: 5px; transition: width 0.1s linear;"></div></div><div id="js-options" style="display:flex; gap: 15px;"></div><p id="js-score" style="margin-top:20px; font-weight:bold;">Score: 0 / 5</p>';
++    container.innerHTML = `
++      <span class="dimension-tag">Dimension: JS-199999</span>
++      <h2 style="font-family: var(--font-heading); letter-spacing:1px;">JS Logic Run</h2>
++      <p style="color: var(--text-secondary);">Evaluate the expression before time runs out!</p>
++      <h3 id="js-expression" style="font-size: 2rem; color: var(--accent); margin: 16px 0; font-family: var(--font-mono);">5 === "5"</h3>
++      <div style="width:100%; max-width:400px; height: 10px; background: var(--bg-card); border: 2px solid #000; margin-bottom: 20px;"><div id="js-timer-bar" style="width: 100%; height: 100%; background: var(--success); transition: width 0.1s linear;"></div></div>
++      <div id="js-options" style="display:flex; gap: 15px; flex-wrap: wrap; justify-content: center;"></div>
++      <p id="js-score" style="margin-top:20px; font-weight:bold; color: var(--secondary);">Score: 0 / 8</p>
++    `;
+     
+     const expressions = [
+       { exp: '5 === "5"', ans: 'false', opts: ['true', 'false', 'undefined'] },
+       { exp: 'typeof []', ans: '"object"', opts: ['"array"', '"object"', '"undefined"'] },
+       { exp: 'Boolean(0)', ans: 'false', opts: ['true', 'false', 'null'] },
+       { exp: '10 % 3', ans: '1', opts: ['3', '1', '0'] },
+-      { exp: 'NaN === NaN', ans: 'false', opts: ['true', 'false', 'Error'] }
++      { exp: 'NaN === NaN', ans: 'false', opts: ['true', 'false', 'Error'] },
++      { exp: '[] + []', ans: '""', opts: ['"[object Object]"', '"NaN"', '""'] },
++      { exp: 'typeof null', ans: '"object"', opts: ['"null"', '"object"', '"undefined"'] },
++      { exp: '"5" + 3', ans: '"53"', opts: ['8', '"53"', 'NaN'] }
+     ];
+     
+     let currentQ = 0;
+@@ -2669,11 +2740,11 @@ document.addEventListener('DOMContentLoaded', () => {
+     function startQuestion() {
+       if (currentQ >= expressions.length) {
+         clearInterval(timerInt);
+-        if (score >= 4) {
+-          container.innerHTML = '<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> You won!</h2><p>You survived the Logic Run.</p><button class="btn btn-accent" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++        if (score >= 6) {
++          arcadeEndScreen(container, true, 'var(--primary)', 'Logic Run Complete!', `You survived with a score of ${score} / ${expressions.length}.`);
+           awardGameXP();
+         } else {
+-          container.innerHTML = '<h2>Game Over</h2><p>You need at least 4 correct to win.</p><button class="btn btn-secondary" onclick="document.getElementById(\'btn-exit-game\').click()">Return to Arcade</button>';
++          arcadeEndScreen(container, false, 'var(--primary)', 'Glitched Out', `You need at least 6 / ${expressions.length} correct to win. You scored ${score}.`);
+         }
+         return;
+       }
+@@ -2695,7 +2766,7 @@ document.addEventListener('DOMContentLoaded', () => {
+           } else {
+             btn.style.background = '#ef4444';
+           }
+-          scoreEl.textContent = `Score: ${score} / 5`;
++          scoreEl.textContent = `Score: ${score} / ${expressions.length}`;
+           setTimeout(() => {
+             currentQ++;
+             startQuestion();
+diff --git a/deploy/arcade-games.js b/deploy/arcade-games.js
+index 44ef376..589b6df 100644
+--- a/deploy/arcade-games.js
++++ b/deploy/arcade-games.js
+@@ -16,7 +16,7 @@ function initUltimateArcade(container) {
+     <h2><i class="fa-solid fa-gamepad" style="color: var(--accent);"></i> Ultimate Course Arcade</h2>
+     <p>Select a course and a game mode to begin your adventure!</p>
+     
+-    <div style="background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
++    <div style="background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
+       
+       <div style="margin-bottom: 20px;">
+         <label style="display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-secondary);">1. Select your Course (The Topic)</label>
+@@ -30,19 +30,19 @@ function initUltimateArcade(container) {
+         
+         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+           <!-- Mode: RPG Boss Battler -->
+-          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-dragon" style="color: #ef4444;"></i> RPG Boss Battler</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Turn-based combat. Answer questions to attack the course boss!</p>
+           </div>
+ 
+           <!-- Mode: Typing Defense -->
+-          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-meteor" style="color: #3b82f6;"></i> Typing Defense</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Defend your base! Type falling concepts from the course quickly.</p>
+           </div>
+ 
+           <!-- Mode: Concept Catcher -->
+-          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
++          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-basket-shopping" style="color: #10b981;"></i> Concept Catcher</h4>
+             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Fast-paced arcade action. Catch good concepts, dodge bugs!</p>
+           </div>
+@@ -127,7 +127,7 @@ function finishUltimateGame(container, won, xpAmount, title, message) {
+   let titleStr = won ? `<h2><i class="fa-solid fa-trophy" style="color: ${trophyColor};"></i> You Won!</h2>` : `<h2><i class="fa-solid fa-skull" style="color: #ef4444;"></i> Game Over</h2>`;
+   
+   container.innerHTML = `
+-    <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
++    <div style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
+       ${titleStr}
+       <h3 style="color: var(--accent); margin: 10px 0;">${title}</h3>
+       <p style="color: var(--text-secondary); margin-bottom: 20px;">${message}</p>
+@@ -199,7 +199,7 @@ function launchRpgBattler(container, courseData) {
+       </div>
+ 
+       <!-- Bottom: Command Menu / Question Box -->
+-      <div style="height: 200px; background: var(--bg-color); border-top: 4px solid var(--border-color); padding: 15px;">
++      <div style="height: 200px; background: var(--bg-dashboard); border-top: 4px solid var(--border-color); padding: 15px;">
+         <div id="rpg-action-area">
+           <p id="rpg-q-text" style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: bold;"></p>
+           <div id="rpg-q-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>

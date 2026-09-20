@@ -16,7 +16,7 @@ function initUltimateArcade(container) {
     <h2><i class="fa-solid fa-gamepad" style="color: var(--accent);"></i> Ultimate Course Arcade</h2>
     <p>Select a course and a game mode to begin your adventure!</p>
     
-    <div style="background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
+    <div style="background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 20px; max-width: 600px;">
       
       <div style="margin-bottom: 20px;">
         <label style="display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-secondary);">1. Select your Course (The Topic)</label>
@@ -30,19 +30,19 @@ function initUltimateArcade(container) {
         
         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
           <!-- Mode: RPG Boss Battler -->
-          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+          <div class="ua-mode-card" data-mode="rpg" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-dragon" style="color: #ef4444;"></i> RPG Boss Battler</h4>
             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Turn-based combat. Answer questions to attack the course boss!</p>
           </div>
 
           <!-- Mode: Typing Defense -->
-          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+          <div class="ua-mode-card" data-mode="typing" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-meteor" style="color: #3b82f6;"></i> Typing Defense</h4>
             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Defend your base! Type falling concepts from the course quickly.</p>
           </div>
 
           <!-- Mode: Concept Catcher -->
-          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-color); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+          <div class="ua-mode-card" data-mode="catcher" style="background: var(--bg-dashboard); border: 2px solid var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
             <h4 style="margin: 0 0 5px 0;"><i class="fa-solid fa-basket-shopping" style="color: #10b981;"></i> Concept Catcher</h4>
             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Fast-paced arcade action. Catch good concepts, dodge bugs!</p>
           </div>
@@ -127,7 +127,7 @@ function finishUltimateGame(container, won, xpAmount, title, message) {
   let titleStr = won ? `<h2><i class="fa-solid fa-trophy" style="color: ${trophyColor};"></i> You Won!</h2>` : `<h2><i class="fa-solid fa-skull" style="color: #ef4444;"></i> Game Over</h2>`;
   
   container.innerHTML = `
-    <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
+    <div style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border-color); max-width: 500px; margin: 0 auto;">
       ${titleStr}
       <h3 style="color: var(--accent); margin: 10px 0;">${title}</h3>
       <p style="color: var(--text-secondary); margin-bottom: 20px;">${message}</p>
@@ -199,7 +199,7 @@ function launchRpgBattler(container, courseData) {
       </div>
 
       <!-- Bottom: Command Menu / Question Box -->
-      <div style="height: 200px; background: var(--bg-color); border-top: 4px solid var(--border-color); padding: 15px;">
+      <div style="height: 200px; background: var(--bg-dashboard); border-top: 4px solid var(--border-color); padding: 15px;">
         <div id="rpg-action-area">
           <p id="rpg-q-text" style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: bold;"></p>
           <div id="rpg-q-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
