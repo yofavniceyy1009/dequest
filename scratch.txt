@@ -1,0 +1,122 @@
+﻿  // --- GAME 4: Course Master Trivia ---
+  function launchCourseTrivia(container) {
+    // 1. Build Dropdown
+    let optionsHtml = '';
+    for (let key in CourseData) {
+      optionsHtml += \<option value="\">\</option>\;
+    }
+
+    container.innerHTML = \
+      <h2>Course Master Trivia</h2>
+      <p>Select any course and test your knowledge against the clock!</p>
+      <div style="margin: 20px 0; display:flex; gap:10px; align-items:center;">
+        <select id="trivia-course-select" class="form-input" style="padding: 10px; border-radius: 5px;">\</select>
+        <button id="btn-start-trivia" class="btn btn-accent">Start Master Run</button>
+      </div>
+      <div id="trivia-game-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; display: none;">
+        <h3 id="trivia-question" style="font-size: 1.5rem; text-align: center; color: var(--accent); margin: 20px 0;"></h3>
+        <div style="width:100%; max-width:600px; height: 10px; background: var(--secondary); border-radius: 5px; margin-bottom: 20px;">
+          <div id="trivia-timer-bar" style="width: 100%; height: 100%; background: #ef4444; border-radius: 5px; transition: width 0.1s linear;"></div>
+        </div>
+        <div id="trivia-options" style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width:600px;"></div>
+        <p id="trivia-score" style="margin-top:20px; font-weight:bold;">Score: 0</p>
+      </div>
+    \;
+
+    document.getElementById('btn-start-trivia').addEventListener('click', () => {
+      const courseKey = document.getElementById('trivia-course-select').value;
+      const course = CourseData[courseKey];
+      
+      // Aggregate all questions
+      let allQuestions = [];
+      course.modules.forEach(m => {
+        if (m.quiz && m.quiz.length > 0) {
+          m.quiz.forEach(q => allQuestions.push(q));
+        }
+      });
+      
+      if (allQuestions.length === 0) {
+        alert('This course doesn\\'t have enough questions yet! Try another one.');
+        return;
+      }
+      
+      // Shuffle questions
+      allQuestions.sort(() => Math.random() - 0.5);
+      
+      // Start Game
+      document.getElementById('btn-start-trivia').parentElement.style.display = 'none';
+      document.getElementById('trivia-game-area').style.display = 'flex';
+      
+      let currentQ = 0;
+      let score = 0;
+      let timeLeft = 100;
+      let timerInt;
+      const totalQs = allQuestions.length > 5 ? 5 : allQuestions.length; // Max 5 questions per run
+      
+      const qEl = document.getElementById('trivia-question');
+      const optionsEl = document.getElementById('trivia-options');
+      const timerBar = document.getElementById('trivia-timer-bar');
+      const scoreEl = document.getElementById('trivia-score');
+      
+      function startQuestion() {
+        if (currentQ >= totalQs) {
+          clearInterval(timerInt);
+          const percent = score / totalQs;
+          if (percent >= 0.8) {
+            container.innerHTML = \<h2><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> \ Master!</h2><p>You scored \/\.</p><button class="btn btn-accent" onclick="document.getElementById('btn-exit-game').click()">Return to Arcade</button>\;
+            awardGameXP();
+          } else {
+            container.innerHTML = \<h2>Game Over</h2><p>You scored \/\. You need 80% to win!</p><button class="btn btn-secondary" onclick="document.getElementById('btn-exit-game').click()">Return to Arcade</button>\;
+          }
+          return;
+        }
+        
+        const q = allQuestions[currentQ];
+        qEl.textContent = q.question;
+        optionsEl.innerHTML = '';
+        
+        q.options.forEach((o, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-primary';
+          btn.textContent = o;
+          btn.addEventListener('click', () => {
+            clearInterval(timerInt);
+            if (index === q.answer) {
+              btn.style.background = '#10b981';
+              score++;
+            } else {
+              btn.style.background = '#ef4444';
+            }
+            scoreEl.textContent = \Score: \ / \\;
+            setTimeout(() => {
+              currentQ++;
+              startQuestion();
+            }, 1000);
+          });
+          optionsEl.appendChild(btn);
+        });
+        
+        timeLeft = 150; // Give a bit more time for reading (15 seconds)
+        timerBar.style.width = '100%';
+        timerBar.style.background = '#10b981';
+        
+        clearInterval(timerInt);
+        timerInt = setInterval(() => {
+          timeLeft -= 1;
+          timerBar.style.width = (timeLeft / 1.5) + '%';
+          if (timeLeft < 75) timerBar.style.background = '#fbbf24';
+          if (timeLeft < 30) timerBar.style.background = '#ef4444';
+          
+          if (timeLeft <= 0) {
+            clearInterval(timerInt);
+            currentQ++;
+            startQuestion();
+          }
+        }, 100);
+      }
+      
+      startQuestion();
+    });
+  }
+
+}); // end DOMContentLoaded

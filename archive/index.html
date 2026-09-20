@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinancePilot - Personalized Budgeting & Decision Coach</title>
+  <meta name="description" content="Take control of your money with context-aware educational coaching, affordability calculators, and scenario planning.">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ================= AUTH VIEW ================= -->
+  <div id="auth-screen" class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        </div>
+        <h1 class="auth-title" id="auth-title-text">FinancePilot</h1>
+        <p class="auth-subtitle" id="auth-subtitle-text">Master your money through educational guidance</p>
+      </div>
+
+      <form id="auth-form">
+        <div class="form-group">
+          <label for="auth-username">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="auth-username" class="form-input" placeholder="Enter your username" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-password">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="auth-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="btn btn-block">Sign In</button>
+      </form>
+
+      <div class="auth-toggle-link">
+        <span id="auth-toggle-msg">Don't have an account?</span>
+        <a href="#" id="auth-toggle-action">Create one now</a>
+      </div>
+
+      <div class="disclaimer-box" style="margin-top: 25px; text-align: center;">
+        <strong>Disclaimer:</strong> FinancePilot is an educational tool. It does not provide regulated investment, tax, or legal advice.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CORE APPLICATION LAYOUT ================= -->
+  <div id="app-root" style="display: none;">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <span class="logo-text">FinancePilot</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </div>
+        <div class="nav-item" data-view="budget" id="nav-budget">
+          <i class="fa-solid fa-wallet"></i> Budget Planner
+        </div>
+        <div class="nav-item" data-view="goals" id="nav-goals">
+          <i class="fa-solid fa-bullseye"></i> Goal Tracker
+        </div>
+        <div class="nav-item" data-view="calculator" id="nav-calculator">
+          <i class="fa-solid fa-calculator"></i> Affordability Tool
+        </div>
+        <div class="nav-item" data-view="scenario" id="nav-scenario">
+          <i class="fa-solid fa-sliders"></i> Scenario Planner
+        </div>
+        <div class="nav-item" data-view="chat" id="nav-chat">
+          <i class="fa-solid fa-comment-medical"></i> AI Coach Chat
+        </div>
+        <div class="nav-item" data-view="profile" id="nav-profile">
+          <i class="fa-solid fa-user-gear"></i> Financial Profile
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar" id="avatar-letters">FC</div>
+          <div class="user-info">
+            <div class="user-name" id="display-username">User</div>
+            <div class="user-role">Premium Member</div>
+          </div>
+          <button class="logout-btn" id="logout-action-btn" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main View Workspace -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="menu-toggle" id="sidebar-toggle" aria-label="Toggle Navigation Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <h2 class="page-title" id="header-view-title">Dashboard</h2>
+        </div>
+
+        <div class="header-actions">
+          <div class="health-score-container" id="header-health-badge" style="cursor: pointer;" title="Click to view health factors">
+            <div class="health-ring" style="width: 40px; height: 40px;">
+              <svg viewBox="0 0 36 36">
+                <circle class="health-ring-bg" cx="18" cy="18" r="14"></circle>
+                <circle class="health-ring-fill" id="health-ring-fill-header" cx="18" cy="18" r="14" stroke-dasharray="88 88" stroke-dashoffset="88"></circle>
+              </svg>
+              <div class="health-score-val" id="health-score-val-header" style="font-size: 0.75rem;">--</div>
+            </div>
+            <div class="health-details" style="gap: 0;">
+              <span class="health-label" style="font-size: 0.85rem;" id="health-label-header">Analyzing...</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ================= VIEW: DASHBOARD ================= -->
+      <section id="view-dashboard" class="view-section active">
+        <!-- Onboarding Alert Banner -->
+        <div class="alert alert-info" id="dashboard-onboarding-banner" style="display: none; margin-bottom: 24px; border-left: 4px solid var(--info);">
+          <i class="fa-solid fa-circle-question" style="color: var(--info); font-size: 1.25rem;"></i>
+          <div>
+            <strong>Welcome to FinancePilot!</strong> Since this is a new account, your profile is currently empty. You can set your income and savings in the <a href="#" id="onboarding-profile-link" style="color: var(--primary); text-decoration: underline; font-weight:600;">Financial Profile</a> tab, or <a href="#" id="onboarding-demo-link" style="color: var(--success); text-decoration: underline; font-weight:600;">Load Demo Data</a> to instantly explore the dashboard features.
+          </div>
+        </div>
+
+        <!-- Overview summary metrics grid -->
+        <div class="dashboard-grid">
+          <div class="card metric-card" style="--accent: var(--primary);">
+            <span class="metric-title">Monthly Income</span>
+            <div class="metric-value" id="dash-income-val">$0.00</div>
+            <span class="metric-change neutral"><i class="fa-solid fa-arrow-right"></i> Active earnings</span>
+          </div>
+
+          <div class="card metric-card" style="--accent: var(--danger);">
+            <span class="metric-title">Monthly Expenses</span>
+            <div class="metric-value" id="dash-expenses-val">$0.00</div>
+            <span class="metric-change neutral" id="dash-expense-pct-sub">0% of income</span>
+          </div>
+
+          <div class="card metric-card" style="--accent: var(--success);">
+            <span class="metric-title">Net Cash Flow</span>
+            <div class="metric-value" id="dash-cashflow-val">$0.00</div>
+            <span class="metric-change up" id="dash-savings-rate-sub"><i class="fa-solid fa-piggy-bank"></i> 0% saved</span>
+          </div>
+
+          <div class="card metric-card" style="--accent: var(--info);">
+            <span class="metric-title">Liquid Savings</span>
+            <div class="metric-value" id="dash-savings-val">$0.00</div>
+            <span class="metric-change neutral" id="dash-emergency-months-sub">0.0 months buffer</span>
+          </div>
+        </div>
+
+        <div class="grid-main-side">
+          <!-- Main Chart Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-chart-line"></i> Savings & Debt Projections</h3>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">3-Year Timeline</div>
+            </div>
+            <div style="position: relative; height: 320px; width: 100%;">
+              <canvas id="projectionChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Score Card -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-shield-halved"></i> Financial Health Score</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin: 15px 0;">
+              <div class="health-ring" style="width: 140px; height: 140px;">
+                <svg viewBox="0 0 36 36">
+                  <circle class="health-ring-bg" cx="18" cy="18" r="14"></circle>
+                  <circle class="health-ring-fill" id="health-ring-fill-main" cx="18" cy="18" r="14" stroke-dasharray="88 88" stroke-dashoffset="88"></circle>
+                </svg>
+                <div class="health-score-val" id="health-score-val-main" style="font-size: 2.2rem;">0</div>
+              </div>
+              <div class="health-label" id="health-label-main">Excellent</div>
+              <p style="font-size: 0.8rem; text-align: center; color: var(--text-secondary);" id="health-desc-main">Your budgeting parameters indicate healthy money management habits.</p>
+            </div>
+            <button class="btn btn-secondary btn-block" id="dashboard-health-detail-btn">View Full Assessment</button>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <!-- Spending category chart -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-chart-pie"></i> Spending Breakdown</h3>
+            </div>
+            <div style="position: relative; height: 260px; width: 100%; display: flex; justify-content: center;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Active goal status list -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-bullseye"></i> Goal Progress</h3>
+              <button class="btn btn-secondary" id="dash-add-goal-btn" style="padding: 4px 10px; font-size: 0.8rem;">Manage Goals</button>
+            </div>
+            <div class="budget-progress-list" id="dash-goals-list">
+              <!-- Dynamically populated goals -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Coach Tip Alert Banner -->
+        <div class="alert alert-info" id="dashboard-tip-banner">
+          <i class="fa-solid fa-lightbulb"></i>
+          <div>
+            <strong>Coach Educational Tip:</strong> <span id="dashboard-tip-text">Set up an emergency fund covering at least three to six months of expenses. This acts as a foundation, shielding you from having to accumulate debt during unexpected emergencies.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: BUDGET PLANNER ================= -->
+      <section id="view-budget" class="view-section">
+        <div class="grid-main-side">
+          <!-- Budget Table & Progress -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-list-check"></i> Monthly Budgets vs Actual Spending</h3>
+            </div>
+            <div class="budget-progress-list" id="budget-planner-list" style="gap: 24px;">
+              <!-- Dynamically populated budget category elements -->
+            </div>
+          </div>
+
+          <!-- Add / Edit Budget and Expenses -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Category budget limit config -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-sliders"></i> Edit Category Limits</h3>
+              </div>
+              <form id="budget-limit-form">
+                <div class="form-group">
+                  <label for="budget-category-select">Spending Category</label>
+                  <select id="budget-category-select" class="form-input" required>
+                    <option value="Housing">Housing</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Food">Food</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Health & Wellness">Health & Wellness</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Shopping">Shopping</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="budget-limit-amt">Limit Amount ($)</label>
+                  <div class="input-wrapper">
+                    <i class="fa-solid fa-dollar-sign input-icon"></i>
+                    <input type="number" id="budget-limit-amt" class="form-input" min="0" required placeholder="500">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-block">Save Limit</button>
+              </form>
+            </div>
+
+            <!-- Add Single Expense Record -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-plus"></i> Record an Expense</h3>
+              </div>
+              <form id="add-expense-form">
+                <div class="form-group">
+                  <label for="exp-name">Expense Name / Vendor</label>
+                  <input type="text" id="exp-name" class="form-input" placeholder="e.g. Groceries Walmart" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="exp-amount">Amount ($)</label>
+                    <input type="number" id="exp-amount" class="form-input" min="0.01" step="0.01" placeholder="45.50" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="exp-category">Category</label>
+                    <select id="exp-category" class="form-input" required>
+                      <option value="Housing">Housing</option>
+                      <option value="Utilities">Utilities</option>
+                      <option value="Food">Food</option>
+                      <option value="Transportation">Transportation</option>
+                      <option value="Health & Wellness">Health & Wellness</option>
+                      <option value="Entertainment">Entertainment</option>
+                      <option value="Shopping">Shopping</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" id="exp-recurring" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                  <label for="exp-recurring" style="margin-bottom: 0; cursor: pointer;">This is a recurring monthly bill</label>
+                </div>
+                <button type="submit" class="btn btn-block">Add Expense</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details list card -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-receipt"></i> Logged Expense Transactions</h3>
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;" id="transactions-table">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                  <th style="padding: 12px;">Name</th>
+                  <th style="padding: 12px;">Category</th>
+                  <th style="padding: 12px;">Type</th>
+                  <th style="padding: 12px; text-align: right;">Amount</th>
+                  <th style="padding: 12px; text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-list">
+                <!-- Dynamically populated table rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: GOAL TRACKER ================= -->
+      <section id="view-goals" class="view-section">
+        <div class="grid-main-side">
+          <!-- Goals cards listing -->
+          <div>
+            <div class="goals-grid" id="active-goals-grid">
+              <!-- Dynamically populated goals -->
+            </div>
+          </div>
+
+          <!-- Add goal card form -->
+          <div class="card" style="height: fit-content;">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-bullseye"></i> Set Financial Goal</h3>
+            </div>
+            <form id="add-goal-form">
+              <div class="form-group">
+                <label for="goal-name">Goal Name</label>
+                <input type="text" id="goal-name" class="form-input" placeholder="e.g. Vacation, House Downpayment" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goal-target">Target Amount ($)</label>
+                  <input type="number" id="goal-target" class="form-input" min="1" placeholder="5000" required>
+                </div>
+                <div class="form-group">
+                  <label for="goal-current">Current Savings ($)</label>
+                  <input type="number" id="goal-current" class="form-input" min="0" placeholder="1000" value="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goal-contribution">Monthly Contribution ($)</label>
+                  <input type="number" id="goal-contribution" class="form-input" min="0" placeholder="250" required>
+                </div>
+                <div class="form-group">
+                  <label for="goal-date">Target Date</label>
+                  <input type="date" id="goal-date" class="form-input" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-block">Establish Goal</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="grid-2col" style="margin-top: 24px;">
+          <!-- Debts payoff cards listing -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-credit-card"></i> Payoff Active Debts</h3>
+            </div>
+            <div class="budget-progress-list" id="active-debts-list">
+              <!-- Dynamically populated debts -->
+            </div>
+          </div>
+
+          <!-- Add debt card form -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-plus"></i> Record a Debt Balance</h3>
+            </div>
+            <form id="add-debt-form">
+              <div class="form-group">
+                <label for="debt-name">Debt Name / Lender</label>
+                <input type="text" id="debt-name" class="form-input" placeholder="e.g. Student Loan, Credit Card" required>
+              </div>
+              <div class="grid-3col" style="margin-bottom: 12px; gap: 12px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="debt-balance">Total Balance ($)</label>
+                  <input type="number" id="debt-balance" class="form-input" min="1" placeholder="12000" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="debt-payment">Min Payment ($/mo)</label>
+                  <input type="number" id="debt-payment" class="form-input" min="1" placeholder="150" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="debt-rate">Interest Rate (%)</label>
+                  <input type="number" id="debt-rate" class="form-input" min="0" step="0.1" placeholder="5.4" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-block">Record Debt</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: AFFORDABILITY CALCULATOR ================= -->
+      <section id="view-calculator" class="view-section">
+        <div class="alert alert-info">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div>
+            <strong>Educational Disclaimer:</strong> This calculator models the long-term impact on your liquid cash flow and simulates timeline delays of your other goals. It does not factor in specific security investments, legal rules, or tax structures.
+          </div>
+        </div>
+
+        <div class="grid-main-side">
+          <!-- Calculator inputs -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-coins"></i> Major Purchase Calculator</h3>
+            </div>
+            <form id="affordability-form">
+              <div class="form-group">
+                <label for="calc-name">Purchase Description</label>
+                <input type="text" id="calc-name" class="form-input" placeholder="e.g. Europe Trip, Used Sedan" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="calc-cost">Total Cost ($)</label>
+                  <div class="input-wrapper">
+                    <i class="fa-solid fa-dollar-sign input-icon"></i>
+                    <input type="number" id="calc-cost" class="form-input" min="1" placeholder="6000" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="calc-months">Months to Purchase</label>
+                  <div class="input-wrapper">
+                    <i class="fa-solid fa-calendar input-icon"></i>
+                    <input type="number" id="calc-months" class="form-input" min="1" placeholder="12" required>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="calc-recurring">Estimated Monthly Recurring Cost ($) <em style="font-size: 0.8rem; color: var(--text-secondary);">(e.g., car insurance, maintenance)</em></label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-receipt input-icon"></i>
+                  <input type="number" id="calc-recurring" class="form-input" min="0" placeholder="150" value="0">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-block">Evaluate Affordability & Tradeoffs</button>
+            </form>
+          </div>
+
+          <!-- Calculation outputs -->
+          <div id="calc-results-placeholder" class="card" style="display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-secondary);">
+            <div>
+              <i class="fa-solid fa-calculator" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+              <p>Enter the details on the left to analyze purchase feasibility and tradeoffs.</p>
+            </div>
+          </div>
+
+          <div id="calc-results-card" class="card result-display-card" style="display: none;">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-file-invoice-dollar"></i> Evaluation Report</h3>
+            </div>
+            
+            <div id="calc-verdict" class="affordability-verdict yes">
+              <i class="fa-solid fa-circle-check"></i>
+              <div>
+                <div class="verdict-text" id="calc-verdict-title">This is affordable!</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);" id="calc-verdict-desc">Your budget has enough monthly room.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+              <div class="goal-details-row">
+                <span>Monthly savings required:</span>
+                <span id="calc-result-monthly-savings">$0.00</span>
+              </div>
+              <div class="goal-details-row">
+                <span>Additional ongoing expense:</span>
+                <span id="calc-result-recurring">$0.00</span>
+              </div>
+              <div class="goal-details-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                <span>Total monthly impact:</span>
+                <strong id="calc-result-total-monthly" style="color: var(--primary);">$0.00</strong>
+              </div>
+              <div class="goal-details-row">
+                <span>Remaining Net Cash Flow:</span>
+                <strong id="calc-result-remaining-cashflow">$0.00</strong>
+              </div>
+            </div>
+
+            <div id="calc-goal-impacts-area" style="display: none; border-top: 1px solid var(--border-color); padding-top: 16px;">
+              <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i> Tradeoffs on Other Goals
+              </h4>
+              <div class="budget-progress-list" id="calc-impacted-goals-list">
+                <!-- Dynamically populated goals delay impact -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: SCENARIO PLANNER ================= -->
+      <section id="view-scenario" class="view-section">
+        <div class="alert alert-info">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>What-If Concept:</strong> Use the controls below to model changes in your monthly budget. Watch how savings rates and monthly cash surpluses shift dynamically against your current baseline in real-time.
+          </div>
+        </div>
+
+        <div class="grid-main-side">
+          <!-- Adjustments Sidebar Panel -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-sliders"></i> Modify Parameters</h3>
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Monthly Income Adjustment</span>
+                <span class="slider-val" id="val-income-slider">+$0</span>
+              </div>
+              <input type="range" id="slider-income" class="form-slider" min="-2000" max="5000" step="50" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Monthly Spending Adjustment</span>
+                <span class="slider-val" id="val-spending-slider">+$0</span>
+              </div>
+              <input type="range" id="slider-spending" class="form-slider" min="-3000" max="3000" step="50" value="0">
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; margin-top: 15px;">
+              <strong>Note:</strong> Sliders represent a change to your baseline. Sliding left reduces numbers (e.g. cutting spending), and sliding right increases them (e.g. getting a salary raise).
+            </div>
+          </div>
+
+          <!-- Delta Display Comparison -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="grid-2col" style="margin-bottom: 0;">
+              <!-- Baseline card -->
+              <div class="card">
+                <span class="metric-title" style="color: var(--text-secondary);">Baseline (Current)</span>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                  <div class="goal-details-row"><span>Income:</span> <span id="scenario-base-income">$0</span></div>
+                  <div class="goal-details-row"><span>Expenses:</span> <span id="scenario-base-expenses">$0</span></div>
+                  <div class="goal-details-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                    <span>Monthly Cash Flow:</span> <strong id="scenario-base-net">$0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scenario card -->
+              <div class="card result-display-card">
+                <span class="metric-title" style="color: var(--primary);">Scenario (Projected)</span>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                  <div class="goal-details-row"><span>Income:</span> <span id="scenario-proj-income">$0</span></div>
+                  <div class="goal-details-row"><span>Expenses:</span> <span id="scenario-proj-expenses">$0</span></div>
+                  <div class="goal-details-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                    <span>Monthly Cash Flow:</span> <strong id="scenario-proj-net">$0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-chart-column"></i> Baseline vs Scenario Comparison</h3>
+              </div>
+              <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="scenarioComparisonChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: AI COACH CHAT ================= -->
+      <section id="view-chat" class="view-section">
+        <div class="chat-container">
+          <!-- Chat Messages Area -->
+          <div class="chat-messages" id="chat-conversation">
+            <!-- Hello Message -->
+            <div class="chat-bubble assistant">
+              👋 **Hello! I'm FinancePilot.**
+              <br><br>
+              My goal is to help you learn financial principles, evaluate tradeoffs, and understand the consequences of financial choices before you make them.
+              <br><br>
+              <em>*Note: I can explain money concepts and run numbers based on your profile, but I do not offer specific investment, stock selection, tax advice, or legal structures.*</em>
+            </div>
+          </div>
+
+          <!-- Suggested prompt chips -->
+          <div class="chat-suggested-prompts">
+            <button class="suggested-prompt-btn" data-prompt="How is my financial health score computed?">How is my health score calculated?</button>
+            <button class="suggested-prompt-btn" data-prompt="Can I afford to buy a $10000 car in 12 months?">Can I buy a $10k car in a year?</button>
+            <button class="suggested-prompt-btn" data-prompt="Explain the difference between a debt snowball and a debt avalanche.">Debt snowball vs avalanche?</button>
+            <button class="suggested-prompt-btn" data-prompt="Should I buy Tesla stock this year?">Should I invest in Tesla stock?</button>
+          </div>
+
+          <!-- Text message box -->
+          <form id="chat-input-form" class="chat-input-area">
+            <input type="text" id="chat-text-input" class="chat-input" placeholder="Ask about budgets, goals, or financial concepts..." autocomplete="off">
+            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: PROFILE / SETTINGS ================= -->
+      <section id="view-profile" class="view-section">
+        <div class="grid-2col">
+          <!-- Income details editing card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-money-bill-wave"></i> Set Monthly Earnings</h3>
+            </div>
+            <form id="profile-earnings-form">
+              <div class="form-group">
+                <label for="prof-salary">Primary Salary / Wages ($/mo)</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-money-check-dollar input-icon"></i>
+                  <input type="number" id="prof-salary" class="form-input" min="0" placeholder="5000" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="prof-other">Other Income / Freelance ($/mo)</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-briefcase input-icon"></i>
+                  <input type="number" id="prof-other" class="form-input" min="0" placeholder="500" value="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="prof-savings">Liquid Savings Balance ($) <em style="font-size: 0.8rem; color: var(--text-secondary);">(Emergency fund & HYSAs)</em></label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-vault input-icon"></i>
+                  <input type="number" id="prof-savings" class="form-input" min="0" placeholder="10000" required>
+                </div>
+              </div>
+              <button type="submit" class="btn">Update Profile Numbers</button>
+            </form>
+          </div>
+
+          <!-- Privacy, security controls and resets -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-user-lock"></i> Privacy & Data Control</h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                FinancePilot operates on a privacy-first model. All records, goals, and conversations are encrypted and saved locally in your browser's session storage. No data is sent to external servers.
+              </p>
+              <div class="alert alert-warning" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <div>
+                  <strong>Data warning:</strong> Clearing your browser data or clicking "Reset Profile Data" below will permanently purge your saved financial logs.
+                </div>
+              </div>
+            </div>
+            
+            <button class="btn btn-danger btn-block" id="reset-all-data-btn">
+              <i class="fa-solid fa-trash-can"></i> Reset Profile Data & Log Out
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="state.js"></script>
+  <script src="calculator.js"></script>
+  <script src="ai-coach.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
