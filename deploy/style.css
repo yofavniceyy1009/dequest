@@ -38,6 +38,7 @@
   --font-sans: 'Oswald', system-ui, sans-serif;
   --font-heading: 'Bangers', cursive;
   --font-mono: 'Fira Code', monospace;
+  --font-pixel: 'Press Start 2P', cursive;
   
   /* Metrics */
   --sidebar-width: 270px;
@@ -1730,7 +1731,94 @@ button, input, select, textarea {
 .suggested-name { font-weight: bold; font-size: 0.9rem; color: #fff; }
 .suggested-level { font-size: 0.75rem; color: var(--text-muted); }
 
-/* Games Arcade Styles — Multiverse Portal Theme */
+/* ===== Arcade Game Canvas — Pixel Night-City Backdrop ===== */
+#game-canvas {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #140b2e 0%, #2a1550 40%, #4a1e5c 70%, #6b1f5c 100%);
+  border: 3px solid #000 !important;
+  box-shadow: 8px 8px 0 var(--secondary) !important;
+}
+
+/* starfield */
+#game-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20px 30px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90px 80px, #fff, transparent),
+    radial-gradient(1px 1px at 150px 40px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 210px 120px, #fff, transparent),
+    radial-gradient(1px 1px at 260px 20px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 320px 90px, #fff, transparent),
+    radial-gradient(1px 1px at 40px 150px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 380px 60px, #fff, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* pixel moon, glowing, top-right */
+#game-canvas::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  right: 34px;
+  width: 56px;
+  height: 56px;
+  background: #fdf6c9;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 4px rgba(253, 246, 201, 0.15),
+    0 0 0 10px rgba(253, 246, 201, 0.08),
+    0 0 30px 6px rgba(253, 246, 201, 0.35);
+  image-rendering: pixelated;
+  z-index: 0;
+}
+
+#game-canvas > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pixel/retro UI text inside games */
+#game-canvas h2, #game-canvas h3 {
+  font-family: var(--font-pixel) !important;
+  font-size: 1rem !important;
+  line-height: 1.6;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+#game-canvas .dimension-tag {
+  font-family: var(--font-pixel) !important;
+  font-size: 0.55rem !important;
+  border-radius: 0 !important;
+}
+
+#game-canvas p {
+  font-family: var(--font-sans);
+}
+
+#game-canvas button {
+  font-family: var(--font-pixel) !important;
+  font-size: 0.65rem !important;
+  border-radius: 0 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.6;
+}
+
+/* pixel-block styling for matcher cards & option tiles rendered inside the canvas */
+#game-canvas .matcher-card,
+#game-canvas #css-options button {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+}
+
+
 #view-games .page-title {
   font-family: var(--font-heading);
   letter-spacing: 1px;
