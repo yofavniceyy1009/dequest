@@ -1,0 +1,270 @@
+diff --git a/deploy/index.html b/deploy/index.html
+index a05b26d..4258a07 100644
+--- a/deploy/index.html
++++ b/deploy/index.html
+@@ -9,7 +9,7 @@
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+-  <link rel="stylesheet" href="style.css?v=11">
++  <link rel="stylesheet" href="style.css?v=12">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ </head>
+ <body>
+diff --git a/deploy/style.css b/deploy/style.css
+index f2be952..dcfc73d 100644
+--- a/deploy/style.css
++++ b/deploy/style.css
+@@ -111,7 +111,7 @@ button, input, select, textarea {
+ .sidebar {
+   width: var(--sidebar-width);
+   background-color: var(--bg-dark);
+-  border-right: 1px solid var(--border-color);
++  border-right: 3px solid #000;
+   display: flex;
+   flex-direction: column;
+   flex-shrink: 0;
+@@ -124,7 +124,7 @@ button, input, select, textarea {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 3px solid #000;
+ }
+ 
+ .logo-icon {
+@@ -176,25 +176,29 @@ button, input, select, textarea {
+ }
+ 
+ .nav-item.active {
+-  color: #fff;
+-  background: linear-gradient(90deg, var(--primary-glow), transparent);
+-  border-left: 3px solid var(--primary);
+-  border-color: rgba(139, 92, 246, 0.15) rgba(139, 92, 246, 0.15) rgba(139, 92, 246, 0.15) var(--primary);
++  color: #000;
++  background: var(--accent);
++  border: 2px solid #000;
++  box-shadow: 3px 3px 0px #000;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
++  transform: rotate(-1deg);
+ }
+ 
+ .sidebar-footer {
+   padding: 20px;
+-  border-top: 1px solid var(--border-color);
++  border-top: 3px solid #000;
+ }
+ 
+ .user-profile-widget {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+-  background: rgba(255, 255, 255, 0.02);
++  background: var(--bg-card);
+   padding: 10px;
+   border-radius: var(--radius-md);
+-  border: 1px solid var(--border-color);
++  border: 2px solid #000;
++  box-shadow: 3px 3px 0px #000;
+   cursor: pointer;
+ }
+ 
+@@ -262,7 +266,7 @@ button, input, select, textarea {
+ .top-header {
+   height: 70px;
+   padding: 0 32px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 3px solid #000;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+@@ -273,6 +277,8 @@ button, input, select, textarea {
+   font-family: var(--font-heading);
+   font-weight: 700;
+   font-size: 1.4rem;
++  letter-spacing: 1px;
++  text-shadow: 2px 2px 0 var(--primary), 4px 4px 0 rgba(0,0,0,0.4);
+ }
+ 
+ .header-stats {
+@@ -285,12 +291,15 @@ button, input, select, textarea {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+-  background: rgba(255, 255, 255, 0.03);
+-  border: 1px solid var(--border-color);
+-  padding: 6px 12px;
+-  border-radius: 30px;
++  background: var(--bg-card);
++  border: 2px solid #000;
++  box-shadow: 2px 2px 0px #000;
++  padding: 6px 14px;
++  border-radius: 20px;
+   font-size: 0.85rem;
+-  font-weight: 600;
++  font-weight: 700;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
+ }
+ 
+ .stat-pill i {
+@@ -300,6 +309,23 @@ button, input, select, textarea {
+ .stat-pill.streak-pill i { color: #f59e0b; }
+ .stat-pill.level-pill i { color: var(--accent); }
+ 
++/* Generic sticker-style stat badge (used on Arcade & other view headers) */
++.stat-badge {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  background: var(--bg-card);
++  border: 2px solid #000;
++  box-shadow: 2px 2px 0px #000;
++  padding: 6px 14px;
++  border-radius: 20px;
++  font-size: 0.85rem;
++  font-weight: 700;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
++  margin-right: 10px;
++}
++
+ /* View Sections */
+ .view-section {
+   display: none;
+diff --git a/index.html b/index.html
+index 787e3f1..596e4d6 100644
+--- a/index.html
++++ b/index.html
+@@ -12,7 +12,7 @@
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&display=swap"
+     rel="stylesheet">
+-  <link rel="stylesheet" href="style.css?v=11">
++  <link rel="stylesheet" href="style.css?v=12">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ </head>
+ 
+diff --git a/style.css b/style.css
+index f2be952..dcfc73d 100644
+--- a/style.css
++++ b/style.css
+@@ -111,7 +111,7 @@ button, input, select, textarea {
+ .sidebar {
+   width: var(--sidebar-width);
+   background-color: var(--bg-dark);
+-  border-right: 1px solid var(--border-color);
++  border-right: 3px solid #000;
+   display: flex;
+   flex-direction: column;
+   flex-shrink: 0;
+@@ -124,7 +124,7 @@ button, input, select, textarea {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 3px solid #000;
+ }
+ 
+ .logo-icon {
+@@ -176,25 +176,29 @@ button, input, select, textarea {
+ }
+ 
+ .nav-item.active {
+-  color: #fff;
+-  background: linear-gradient(90deg, var(--primary-glow), transparent);
+-  border-left: 3px solid var(--primary);
+-  border-color: rgba(139, 92, 246, 0.15) rgba(139, 92, 246, 0.15) rgba(139, 92, 246, 0.15) var(--primary);
++  color: #000;
++  background: var(--accent);
++  border: 2px solid #000;
++  box-shadow: 3px 3px 0px #000;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
++  transform: rotate(-1deg);
+ }
+ 
+ .sidebar-footer {
+   padding: 20px;
+-  border-top: 1px solid var(--border-color);
++  border-top: 3px solid #000;
+ }
+ 
+ .user-profile-widget {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+-  background: rgba(255, 255, 255, 0.02);
++  background: var(--bg-card);
+   padding: 10px;
+   border-radius: var(--radius-md);
+-  border: 1px solid var(--border-color);
++  border: 2px solid #000;
++  box-shadow: 3px 3px 0px #000;
+   cursor: pointer;
+ }
+ 
+@@ -262,7 +266,7 @@ button, input, select, textarea {
+ .top-header {
+   height: 70px;
+   padding: 0 32px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 3px solid #000;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+@@ -273,6 +277,8 @@ button, input, select, textarea {
+   font-family: var(--font-heading);
+   font-weight: 700;
+   font-size: 1.4rem;
++  letter-spacing: 1px;
++  text-shadow: 2px 2px 0 var(--primary), 4px 4px 0 rgba(0,0,0,0.4);
+ }
+ 
+ .header-stats {
+@@ -285,12 +291,15 @@ button, input, select, textarea {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+-  background: rgba(255, 255, 255, 0.03);
+-  border: 1px solid var(--border-color);
+-  padding: 6px 12px;
+-  border-radius: 30px;
++  background: var(--bg-card);
++  border: 2px solid #000;
++  box-shadow: 2px 2px 0px #000;
++  padding: 6px 14px;
++  border-radius: 20px;
+   font-size: 0.85rem;
+-  font-weight: 600;
++  font-weight: 700;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
+ }
+ 
+ .stat-pill i {
+@@ -300,6 +309,23 @@ button, input, select, textarea {
+ .stat-pill.streak-pill i { color: #f59e0b; }
+ .stat-pill.level-pill i { color: var(--accent); }
+ 
++/* Generic sticker-style stat badge (used on Arcade & other view headers) */
++.stat-badge {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  background: var(--bg-card);
++  border: 2px solid #000;
++  box-shadow: 2px 2px 0px #000;
++  padding: 6px 14px;
++  border-radius: 20px;
++  font-size: 0.85rem;
++  font-weight: 700;
++  font-family: var(--font-heading);
++  letter-spacing: 0.5px;
++  margin-right: 10px;
++}
++
+ /* View Sections */
+ .view-section {
+   display: none;
