@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&family=Press+Start+2P&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -117,7 +117,7 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="logo-icon"><i class="fa-solid fa-gamepad"></i></div>
-        <span class="logo-text">DevQuest</span>
+        <span class="logo-text glitch-text">DevQuest</span>
       </div>
 
       <nav class="sidebar-nav">
@@ -691,7 +691,16 @@
               <button class="btn btn-accent btn-play-game" data-game="java-matcher">Play Now (+50 XP)</button>
             </div>
 
-            <!-- Game 5: Ultimate Course Games -->
+            <!-- Game 5: Mech Runner -->
+            <div class="card game-card">
+              <span class="dimension-tag">Dimension: MECH-8</span>
+              <div class="game-icon"><i class="fa-solid fa-robot"></i></div>
+              <h3>Mech Runner</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">Answer 3 in a row correctly to power your mech forward and reach the portal.</p>
+              <button class="btn btn-accent btn-play-game" data-game="mech-runner">Play Now (+50 XP)</button>
+            </div>
+
+            <!-- Game 6: Ultimate Course Games -->
             <div class="card game-card ultimate-card" style="grid-column: 1 / -1;">
               <span class="dimension-tag">Dimension: PRIME</span>
               <div class="game-icon"><i class="fa-solid fa-gamepad"></i></div>
@@ -790,7 +799,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script src="data.js?v=4"></script>
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=36"></script>
   <script src="arcade-games.js?v=5"></script>
 
   <!-- Firebase Compat SDKs (Safe for local file:// testing) -->

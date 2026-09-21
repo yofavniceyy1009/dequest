@@ -2416,6 +2416,8 @@ document.addEventListener('DOMContentLoaded', () => {
       launchJsLogic(canvas);
     } else if (gameType === 'java-matcher') {
       launchJavaMatcher(canvas);
+    } else if (gameType === 'mech-runner') {
+      launchMechRunner(canvas);
     } else if (gameType === 'ultimate-arcade') {
       if (typeof initUltimateArcade === 'function') {
         initUltimateArcade(canvas);
@@ -2795,6 +2797,146 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     startQuestion();
+  }
+
+  // --- GAME 5: Mech Runner (answer 3 to advance) ---
+  function launchMechRunner(container) {
+    const TRACK_STEPS = 9; // steps to reach the portal/flag
+    const MAX_ROUNDS = 5;  // 5 rounds x 3 questions = up to 15 correct answers possible
+
+    const questionPool = [
+      { q: 'Which tag creates a hyperlink?', opts: ['<link>', '<a>', '<href>'], ans: '<a>' },
+      { q: 'What does CSS stand for?', opts: ['Cascading Style Sheets', 'Computer Style System', 'Creative Style Syntax'], ans: 'Cascading Style Sheets' },
+      { q: 'Which keyword declares a constant in JS?', opts: ['var', 'let', 'const'], ans: 'const' },
+      { q: 'Which Java type holds true/false?', opts: ['boolean', 'int', 'char'], ans: 'boolean' },
+      { q: 'What does the box-sizing: border-box do?', opts: ['Includes padding/border in width', 'Removes all borders', 'Adds a shadow'], ans: 'Includes padding/border in width' },
+      { q: 'Which array method adds to the end?', opts: ['shift()', 'push()', 'pop()'], ans: 'push()' },
+      { q: 'HTML element for a numbered list?', opts: ['<ul>', '<ol>', '<dl>'], ans: '<ol>' },
+      { q: 'What does "==" vs "===" check in JS?', opts: ['=== also checks type', 'No difference', '== is faster'], ans: '=== also checks type' },
+      { q: 'Which Java keyword extends a class?', opts: ['implements', 'extends', 'inherits'], ans: 'extends' },
+      { q: 'What unit is relative to the root font size?', opts: ['em', 'rem', 'vh'], ans: 'rem' },
+      { q: 'Which HTTP method typically creates data?', opts: ['GET', 'POST', 'DELETE'], ans: 'POST' },
+      { q: 'What does DOM stand for?', opts: ['Document Object Model', 'Data Object Method', 'Display Order Map'], ans: 'Document Object Model' },
+      { q: 'Which selects all <p> elements in CSS?', opts: ['#p', '.p', 'p'], ans: 'p' },
+      { q: 'Which Java type stores decimals?', opts: ['int', 'double', 'long'], ans: 'double' },
+      { q: 'What does "!" mean before a JS boolean?', opts: ['Doubles it', 'Negates it', 'Deletes it'], ans: 'Negates it' }
+    ];
+
+    let round = 0;
+    let questionInRound = 0;
+    let stepsTaken = 0;
+    let roundQuestions = [];
+
+    container.innerHTML = `
+      <span class="dimension-tag">Dimension: MECH-8</span>
+      <h2>Mech Runner</h2>
+      <p style="color: var(--text-secondary); font-family: var(--font-sans);">Answer 3 questions right to power your mech forward one leg at a time. Get one wrong and the mech holds position for that round.</p>
+      <p id="mech-round-label" style="font-family: var(--font-pixel); font-size: 0.6rem; color: var(--accent); margin: 10px 0;">ROUND 1 / ${MAX_ROUNDS}</p>
+
+      <div id="mech-track" style="position:relative; width:100%; max-width:560px; height:70px; background: linear-gradient(180deg, transparent 0%, transparent 60%, #2a1a1a 60%, #4a2f1a 100%); border: 3px solid #000; margin: 10px 0 24px; overflow:hidden;">
+        <div id="mech-sprite" style="position:absolute; bottom:10px; left:2%; width:34px; height:34px; transition: left 0.6s ease; display:flex; align-items:center; justify-content:center; font-size:1.6rem; filter: drop-shadow(0 0 6px var(--secondary));">🤖</div>
+        <div style="position:absolute; bottom:10px; right:2%; font-size:1.6rem;">🌀</div>
+      </div>
+
+      <div id="mech-dots" style="display:flex; gap:8px; margin-bottom:16px;"></div>
+
+      <h3 id="mech-question" style="max-width:480px;">Loading...</h3>
+      <div id="mech-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px; margin-top:14px;"></div>
+    `;
+
+    const sprite = document.getElementById('mech-sprite');
+    const track = document.getElementById('mech-track');
+    const dotsEl = document.getElementById('mech-dots');
+    const roundLabel = document.getElementById('mech-round-label');
+    const qEl = document.getElementById('mech-question');
+    const optsEl = document.getElementById('mech-options');
+
+    function shuffledPool() {
+      return [...questionPool].sort(() => Math.random() - 0.5);
+    }
+
+    function updateSpritePosition() {
+      const pct = Math.min(stepsTaken / TRACK_STEPS, 1) * 88; // leave room before the portal
+      sprite.style.left = (2 + pct) + '%';
+    }
+
+    function renderDots() {
+      dotsEl.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        const state = roundQuestions[i] === undefined ? 'pending' : (roundQuestions[i] ? 'correct' : 'wrong');
+        dot.style = `width:14px; height:14px; border:2px solid #000; background:${state === 'pending' ? '#333' : state === 'correct' ? 'var(--success)' : 'var(--danger)'};`;
+        dotsEl.appendChild(dot);
+      }
+    }
+
+    let pool = shuffledPool();
+    let poolIndex = 0;
+
+    function nextQuestion() {
+      if (poolIndex >= pool.length) { pool = shuffledPool(); poolIndex = 0; }
+      const q = pool[poolIndex++];
+      qEl.textContent = q.q;
+      optsEl.innerHTML = '';
+      const opts = [...q.opts].sort(() => Math.random() - 0.5);
+      opts.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-secondary';
+        btn.textContent = o;
+        btn.addEventListener('click', () => handleAnswer(o === q.ans, btn));
+        optsEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(correct, btn) {
+      optsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+      btn.style.background = correct ? 'var(--success)' : 'var(--danger)';
+      roundQuestions[questionInRound] = correct;
+      renderDots();
+
+      setTimeout(() => {
+        questionInRound++;
+        if (questionInRound < 3) {
+          nextQuestion();
+        } else {
+          finishRound();
+        }
+      }, 600);
+    }
+
+    function finishRound() {
+      const correctCount = roundQuestions.filter(Boolean).length;
+      const allThree = correctCount === 3;
+
+      if (allThree) {
+        stepsTaken++;
+        updateSpritePosition();
+        qEl.textContent = 'Full power! The mech advances one leg forward.';
+      } else {
+        qEl.textContent = `${correctCount}/3 correct — need all 3 right to advance this round. Mech holds position.`;
+      }
+      optsEl.innerHTML = '';
+
+      round++;
+      setTimeout(() => {
+        if (stepsTaken >= TRACK_STEPS) {
+          arcadeEndScreen(container, true, 'var(--secondary)', 'Portal Reached!', `Your mech crossed the dimension in ${round} round${round === 1 ? '' : 's'}.`);
+          awardGameXP();
+        } else if (round >= MAX_ROUNDS) {
+          arcadeEndScreen(container, false, 'var(--secondary)', 'Out of Power Cells', `You reached ${stepsTaken} / ${TRACK_STEPS} steps. Try again to make it through the portal.`);
+        } else {
+          questionInRound = 0;
+          roundQuestions = [];
+          roundLabel.textContent = `ROUND ${round + 1} / ${MAX_ROUNDS}`;
+          renderDots();
+          nextQuestion();
+        }
+      }, 1400);
+    }
+
+    updateSpritePosition();
+    renderDots();
+    nextQuestion();
   }
   // --- GAME 4: Course Master Trivia ---
   function launchCourseTrivia(container) {
